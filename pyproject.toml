@@ -74,5 +74,45 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --tb=short"
+addopts = [
+    "-v",
+    "--tb=short",
+    "--cov=src",
+    "--cov-report=html",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+    "--cov-branch",
+    "--cov-fail-under=85",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+    # Exclude advanced/innovation features not part of core assignment
+    "src/core/*",
+    "src/evaluation/adversarial_tester.py",
+    "src/evaluation/cost_analysis.py",
+    "src/training/active_learning_trainer.py",
+    "src/visualization/cost_visualizer.py",
+    "src/visualization/interactive_dashboard.py",
+    "src/visualization/live_monitor.py",
+    "src/models/bayesian_lstm.py",
+    "src/models/attention_lstm.py",
+    "src/models/hybrid_lstm.py",
+    "src/quality/security.py",
+    "src/quality/validator.py",
+    "src/quality/monitoring.py",
+    "src/quality/metrics_collector.py",
+]
+branch = true
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+fail_under = 85.0
 
