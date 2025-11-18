@@ -9,6 +9,8 @@ import torch
 import numpy as np
 from pathlib import Path
 import yaml
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend for CI
 
 from src.data import SignalGenerator, SignalConfig, FrequencyExtractionDataset, create_train_test_generators
 from src.data.dataset import StatefulDataLoader, create_dataloaders
@@ -608,6 +610,216 @@ class TestReproducibility:
         assert len(losses1) == len(losses2)
         for l1, l2 in zip(losses1, losses2):
             assert abs(l1 - l2) < 0.01  # Small tolerance for numerical differences
+
+
+@pytest.mark.integration
+class TestQualityModuleIntegration:
+    """Test quality module integration."""
+    
+    def test_quality_module_imports(self):
+        """Test that quality module imports work correctly."""
+        # This ensures the __init__ file is covered
+        from src.quality import (
+            QualityMetricsCollector,
+            InputValidator,
+            ConfigValidator,
+            SecurityManager,
+            PerformanceMonitor,
+            ReliabilityMonitor
+        )
+        
+        assert QualityMetricsCollector is not None
+        assert InputValidator is not None
+        assert ConfigValidator is not None
+        assert SecurityManager is not None
+        assert PerformanceMonitor is not None
+        assert ReliabilityMonitor is not None
+
+
+@pytest.mark.integration
+class TestDatasetAdvancedMethods:
+    """Test advanced dataset methods."""
+    
+    def test_get_sequence(self, minimal_dataset):
+        """Test getting sequential data."""
+        sequence_length = 10
+        start_idx = 0
+        
+        input_seq, target_seq = minimal_dataset.get_sequence(start_idx, sequence_length)
+        
+        assert input_seq.shape[0] == sequence_length
+        assert target_seq.shape[0] == sequence_length
+        assert input_seq.shape[1] == minimal_dataset.num_frequencies + 1
+        assert target_seq.shape[1] == 1
+    
+    def test_get_time_series_for_frequency(self, minimal_dataset):
+        """Test getting time series for specific frequency."""
+        freq_idx = 0
+        
+        time_vector, mixed, target = minimal_dataset.get_time_series_for_frequency(freq_idx)
+        
+        assert len(time_vector) == len(mixed)
+        assert len(mixed) == len(target)
+        assert isinstance(time_vector, np.ndarray)
+        assert isinstance(mixed, np.ndarray)
+        assert isinstance(target, np.ndarray)
+
+
+@pytest.mark.integration
+class TestTrainerVariants:
+    """Test trainer with different configurations."""
+    
+    def test_trainer_with_sgd(self, minimal_model, minimal_train_loader, device, temp_dir):
+        """Test trainer with SGD optimizer."""
+        config = {
+            'epochs': 2,
+            'learning_rate': 0.01,
+            'optimizer': 'sgd',
+            'weight_decay': 0.0001
+        }
+        
+        trainer = LSTMTrainer(
+            model=minimal_model,
+            train_loader=minimal_train_loader,
+            val_loader=None,
+            config=config,
+            device=device,
+            experiment_dir=temp_dir
+        )
+        
+        history = trainer.train()
+        assert len(history['train_loss']) == 2
+    
+    def test_trainer_with_adamw(self, minimal_model, minimal_train_loader, device, temp_dir):
+        """Test trainer with AdamW optimizer."""
+        config = {
+            'epochs': 2,
+            'learning_rate': 0.001,
+            'optimizer': 'adamw',
+            'weight_decay': 0.01
+        }
+        
+        trainer = LSTMTrainer(
+            model=minimal_model,
+            train_loader=minimal_train_loader,
+            val_loader=None,
+            config=config,
+            device=device,
+            experiment_dir=temp_dir
+        )
+        
+        history = trainer.train()
+        assert len(history['train_loss']) == 2
+    
+    def test_trainer_with_cosine_scheduler(self, minimal_model, minimal_train_loader, device, temp_dir):
+        """Test trainer with cosine annealing scheduler."""
+        config = {
+            'epochs': 3,
+            'learning_rate': 0.001,
+            'optimizer': 'adam',
+            'scheduler': 'cosine'
+        }
+        
+        trainer = LSTMTrainer(
+            model=minimal_model,
+            train_loader=minimal_train_loader,
+            val_loader=None,
+            config=config,
+            device=device,
+            experiment_dir=temp_dir
+        )
+        
+        history = trainer.train()
+        assert len(history['train_loss']) == 3
+        # Learning rate should decrease
+        assert history['learning_rate'][-1] < history['learning_rate'][0]
+    
+    def test_trainer_with_reduce_on_plateau_scheduler(self, minimal_model, minimal_train_loader, device, temp_dir):
+        """Test trainer with ReduceLROnPlateau scheduler."""
+        config = {
+            'epochs': 3,
+            'learning_rate': 0.001,
+            'optimizer': 'adam',
+            'scheduler': 'reduce_on_plateau',
+            'scheduler_factor': 0.5,
+            'scheduler_patience': 1
+        }
+        
+        trainer = LSTMTrainer(
+            model=minimal_model,
+            train_loader=minimal_train_loader,
+            val_loader=None,
+            config=config,
+            device=device,
+            experiment_dir=temp_dir
+        )
+        
+        history = trainer.train()
+        assert len(history['train_loss']) == 3
+
+
+@pytest.mark.integration
+class TestVisualizationIntegration:
+    """Test visualization integration with real data."""
+    
+    def test_create_all_visualizations_integration(self, minimal_dataset, minimal_model, device, temp_dir):
+        """Test creating all visualizations with real model predictions."""
+        matplotlib.use('Agg')
+        
+        # Get predictions
+        minimal_model.eval()
+        predictions_dict = {}
+        
+        with torch.no_grad():
+            for freq_idx in range(minimal_dataset.num_frequencies):
+                time_vector, mixed, target = minimal_dataset.get_time_series_for_frequency(freq_idx)
+                
+                # Create predictions
+                predictions = []
+                for i in range(len(target)):
+                    inp, _ = minimal_dataset[i]
+                    pred = minimal_model(inp.unsqueeze(0).to(device))
+                    predictions.append(pred.cpu().item())
+                
+                predictions_dict[freq_idx] = np.array(predictions)
+        
+        # Create visualizations
+        history = {
+            'train_loss': [0.5, 0.3, 0.2],
+            'val_loss': [0.6, 0.35, 0.25],
+            'learning_rate': [0.001, 0.001, 0.0005]
+        }
+        
+        train_metrics = {
+            'overall': {
+                'mse': 0.01,
+                'mae': 0.08,
+                'r2_score': 0.95
+            }
+        }
+        
+        test_metrics = {
+            'overall': {
+                'mse': 0.012,
+                'mae': 0.09,
+                'r2_score': 0.93
+            }
+        }
+        
+        # This should complete without error
+        create_all_visualizations(
+            test_dataset=minimal_dataset,
+            predictions_dict=predictions_dict,
+            frequencies=list(minimal_dataset.generator.frequencies),
+            history=history,
+            train_metrics=train_metrics,
+            test_metrics=test_metrics,
+            save_dir=temp_dir
+        )
+        
+        # Check that at least some plots were created
+        plots = list(temp_dir.glob("*.png"))
+        assert len(plots) > 0
 
 
 if __name__ == "__main__":

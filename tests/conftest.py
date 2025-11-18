@@ -158,6 +158,16 @@ def minimal_dataloader(minimal_dataset):
     )
 
 
+@pytest.fixture
+def minimal_train_loader(minimal_dataset):
+    """Create minimal train loader (alias for compatibility)."""
+    return StatefulDataLoader(
+        minimal_dataset,
+        batch_size=16,
+        shuffle_frequencies=False
+    )
+
+
 # ============================================================================
 # Model Fixtures
 # ============================================================================
