@@ -103,7 +103,7 @@ class FrequencyExtractionDataset(Dataset):
         
         return input_tensor, target_tensor
     
-    def get_sequence_batch(
+    def get_sequence(
         self, 
         start_idx: int, 
         sequence_length: int
@@ -117,7 +117,7 @@ class FrequencyExtractionDataset(Dataset):
             
         Returns:
             Tuple of (input_sequence, target_sequence)
-            - input_sequence: shape (sequence_length, 5)
+            - input_sequence: shape (sequence_length, num_frequencies + 1)
             - target_sequence: shape (sequence_length, 1)
         """
         inputs = []
@@ -132,6 +132,26 @@ class FrequencyExtractionDataset(Dataset):
         target_sequence = torch.stack(targets)
         
         return input_sequence, target_sequence
+    
+    def get_sequence_batch(
+        self, 
+        start_idx: int, 
+        sequence_length: int
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Get a sequence of consecutive samples (for L > 1).
+        Alias for get_sequence() for backward compatibility.
+        
+        Args:
+            start_idx: Starting index
+            sequence_length: Number of consecutive samples
+            
+        Returns:
+            Tuple of (input_sequence, target_sequence)
+            - input_sequence: shape (sequence_length, num_frequencies + 1)
+            - target_sequence: shape (sequence_length, 1)
+        """
+        return self.get_sequence(start_idx, sequence_length)
     
     def get_time_series_for_frequency(
         self, 
