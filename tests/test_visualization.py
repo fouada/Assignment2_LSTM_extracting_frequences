@@ -691,8 +691,8 @@ class TestStyleAndFormat:
         """Test that plots use the configured style."""
         import matplotlib.pyplot as plt
         
-        # Check that style is applied
-        assert plt.rcParams['figure.figsize'] == (15, 8)
+        # Check that style is applied (matplotlib stores as list)
+        assert list(plt.rcParams['figure.figsize']) == [15, 8]
         assert plt.rcParams['font.size'] == 12
     
     def test_plot_saves_with_high_dpi(self, temp_dir):

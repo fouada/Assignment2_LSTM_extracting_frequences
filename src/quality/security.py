@@ -8,7 +8,7 @@ import secrets
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional, List, Tuple
 from datetime import datetime
 from cryptography.fernet import Fernet
 import base64
@@ -408,7 +408,7 @@ class SecurityManager:
         
         return api_key
     
-    def validate_api_key(self, api_key: str) -> tuple[bool, Optional[str]]:
+    def validate_api_key(self, api_key: str) -> Tuple[bool, Optional[str]]:
         """
         Validate API key
         

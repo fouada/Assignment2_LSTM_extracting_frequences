@@ -43,12 +43,17 @@ class SignalGenerator:
         """
         self.config = config
         self.frequencies = np.array(config.frequencies)
+        
+        # Validate frequencies
+        if np.any(self.frequencies <= 0):
+            raise ValueError(f"All frequencies must be positive, got: {self.frequencies}")
+        
         self.num_frequencies = len(self.frequencies)
         self.num_samples = int(config.sampling_rate * config.duration)
         self.time_vector = np.linspace(0, config.duration, self.num_samples)
         
-        # Set random seed for reproducibility
-        np.random.seed(config.seed)
+        # Store random state for reproducibility
+        self.rng = np.random.RandomState(config.seed)
         
         logger.info(f"SignalGenerator initialized with seed={config.seed}")
         logger.info(f"Frequencies: {self.frequencies} Hz")
@@ -75,14 +80,14 @@ class SignalGenerator:
         """
         num_samples = len(time)
         
-        # Generate random amplitude and phase for EACH sample
-        amplitudes = np.random.uniform(
+        # Generate random amplitude and phase for EACH sample using stored RNG
+        amplitudes = self.rng.uniform(
             self.config.amplitude_range[0],
             self.config.amplitude_range[1],
             size=num_samples
         )
         
-        phases = np.random.uniform(
+        phases = self.rng.uniform(
             self.config.phase_range[0],
             self.config.phase_range[1],
             size=num_samples

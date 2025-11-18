@@ -229,14 +229,15 @@ class TestTrainingEpoch:
                 assert grad_norm < 100.0
     
     @pytest.mark.edge_case
-    def test_train_epoch_with_empty_loader(self, minimal_model, device, experiment_dir):
+    def test_train_epoch_with_empty_loader(self, device, experiment_dir):
         """Test training with empty dataloader."""
         from src.data.dataset import StatefulDataLoader, FrequencyExtractionDataset
         from src.data import SignalGenerator, SignalConfig
+        from src.models import create_model
         
-        # Create minimal dataset
+        # Create minimal dataset with 2 frequencies to match model size
         config = SignalConfig(
-            frequencies=[1.0],
+            frequencies=[1.0, 3.0],
             sampling_rate=10,
             duration=0.1,
             amplitude_range=(0.8, 1.2),
@@ -253,11 +254,19 @@ class TestTrainingEpoch:
             'optimizer': 'adam'
         }
         
-        # Update model input size to match dataset
-        minimal_model.input_size = 2  # S[t] + 1 one-hot
+        # Create model with matching input size (S[t] + 2 one-hot)
+        model_config = {
+            'input_size': 3,
+            'hidden_size': 32,
+            'num_layers': 1,
+            'output_size': 1,
+            'dropout': 0.1,
+            'bidirectional': False
+        }
+        model = create_model(model_config).to(device)
         
         trainer = LSTMTrainer(
-            model=minimal_model,
+            model=model,
             train_loader=loader,
             val_loader=None,
             config=training_config,

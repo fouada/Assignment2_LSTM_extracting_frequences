@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 # Set professional style
 sns.set_style("whitegrid")
-plt.rcParams['figure.figsize'] = (15, 8)
+plt.rcParams['figure.figsize'] = [15, 8]  # Must be list for matplotlib
 plt.rcParams['font.size'] = 12
 plt.rcParams['axes.labelsize'] = 14
 plt.rcParams['axes.titlesize'] = 16
@@ -237,8 +237,15 @@ class FrequencyExtractionVisualizer:
         
         fig, axes = plt.subplots(1, 3, figsize=(18, 5))
         
-        # Error histogram
-        axes[0].hist(errors, bins=50, edgecolor='black', alpha=0.7)
+        # Error histogram - handle edge case where all errors are the same
+        error_range = np.max(errors) - np.min(errors)
+        if error_range < 1e-10:
+            # All errors are essentially the same, use fewer bins
+            bins = 1
+        else:
+            bins = min(50, int(len(errors) / 10))  # Adaptive bins
+        
+        axes[0].hist(errors, bins=bins, edgecolor='black', alpha=0.7)
         axes[0].axvline(0, color='red', linestyle='--', linewidth=2)
         axes[0].set_xlabel('Prediction Error', fontweight='bold')
         axes[0].set_ylabel('Frequency', fontweight='bold')

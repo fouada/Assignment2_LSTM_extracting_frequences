@@ -267,7 +267,7 @@ class LSTMTrainer:
             return False
         else:
             self.patience_counter += 1
-            if self.patience_counter >= patience:
+            if self.patience_counter > patience:
                 logger.info(f"Early stopping triggered after {patience} epochs without improvement")
                 return True
             return False
