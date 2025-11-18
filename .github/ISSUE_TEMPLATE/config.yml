@@ -1,0 +1,12 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/yourusername/lstm-frequency-extraction/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 📖 Documentation
+    url: https://github.com/yourusername/lstm-frequency-extraction/tree/main/docs
+    about: Read the comprehensive documentation
+  - name: 🔒 Security Issue
+    url: https://github.com/yourusername/lstm-frequency-extraction/security/advisories/new
+    about: Report a security vulnerability privately
+

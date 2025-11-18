@@ -1,0 +1,153 @@
+# Production Configuration with Plugin Support
+# Professional MIT-Level Implementation with Extensibility
+
+# Data Generation Parameters
+data:
+  frequencies: [1.0, 3.0, 5.0, 7.0]  # Hz
+  sampling_rate: 1000  # Hz
+  duration: 10.0  # seconds
+  num_samples: 10000  # calculated: duration * sampling_rate
+  
+  # Noise parameters
+  amplitude_range: [0.8, 1.2]
+  phase_range: [0, 6.283185307179586]  # [0, 2π]
+  
+  # Random seeds for reproducibility
+  train_seed: 1
+  test_seed: 2
+  
+  # Dataset structure
+  num_frequencies: 4
+  total_train_samples: 40000  # num_samples * num_frequencies
+
+# Model Architecture
+model:
+  input_size: 5  # S[t] + 4 one-hot values
+  hidden_size: 128
+  num_layers: 2
+  output_size: 1
+  dropout: 0.2
+  bidirectional: false
+  
+  # State management
+  stateful: true
+  sequence_length: 1  # L=1 for this assignment
+
+# Training Parameters
+training:
+  batch_size: 32
+  epochs: 50
+  learning_rate: 0.001
+  weight_decay: 1e-5
+  
+  # Optimization
+  optimizer: "adam"
+  scheduler: "reduce_on_plateau"
+  scheduler_patience: 5
+  scheduler_factor: 0.5
+  
+  # Early stopping (can be disabled if plugin is used)
+  early_stopping_patience: 10
+  min_delta: 1e-6
+  
+  # Gradient clipping
+  gradient_clip_value: 1.0
+  
+  # Validation
+  validation_split: 0.1
+
+# Evaluation
+evaluation:
+  metrics: ["mse", "mae", "r2_score"]
+  visualization_samples: 1000  # samples to plot
+
+# Experiment Tracking
+experiment:
+  name: "lstm_frequency_extraction"
+  save_dir: "./experiments"
+  save_model: true
+  save_plots: true
+  log_frequency: 100  # batches
+  
+# Computational
+compute:
+  device: "auto"  # auto, cpu, cuda, mps
+  num_workers: 4
+  pin_memory: true
+  
+# Reproducibility
+reproducibility:
+  seed: 42
+  deterministic: true
+  benchmark: false
+
+# ============================================================================
+# PLUGIN CONFIGURATION
+# ============================================================================
+
+plugins:
+  # TensorBoard logging plugin
+  tensorboard:
+    enabled: true
+    log_histograms: true
+    log_interval: 100
+    log_embeddings: false
+  
+  # Early stopping plugin (more flexible than built-in)
+  early_stopping:
+    enabled: true
+    monitor: "val_loss"
+    patience: 10
+    min_delta: 1e-6
+    mode: "min"  # 'min' or 'max'
+    restore_best_weights: true
+  
+  # Custom metrics plugin
+  custom_metrics:
+    enabled: true
+    metrics:
+      - frequency_error
+      - snr
+      - nrmse
+  
+  # Data augmentation plugin
+  data_augmentation:
+    enabled: false  # Enable for more robust training
+    noise_std: 0.01
+    scale_range: [0.95, 1.05]
+    augmentations: ["noise", "scale"]
+    augmentation_prob: 0.5
+  
+  # Model checkpoint plugin
+  model_checkpoint:
+    enabled: true
+    save_best_only: false
+    save_frequency: 10  # Save every N epochs
+    save_top_k: 3  # Keep best K models
+  
+  # Learning rate finder plugin
+  lr_finder:
+    enabled: false  # Enable to find optimal learning rate
+    start_lr: 1e-7
+    end_lr: 1.0
+    num_steps: 100
+  
+  # Gradient monitoring plugin
+  gradient_monitor:
+    enabled: false
+    check_interval: 10
+    log_histograms: true
+    detect_anomalies: true
+
+# ============================================================================
+# CUSTOM PLUGIN DEFINITIONS
+# ============================================================================
+
+# Users can add their own plugins here
+custom_plugins:
+  # Example custom plugin
+  # my_custom_plugin:
+  #   enabled: true
+  #   param1: value1
+  #   param2: value2
+

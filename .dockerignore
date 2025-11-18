@@ -1,0 +1,73 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Logs
+*.log
+training.log
+
+# Experiments (keep structure but not large files)
+experiments/*/plots/*.png
+experiments/*/plots/*.jpg
+experiments/*/plots/*.pdf
+experiments/*/checkpoints/*.pt
+experiments/*/checkpoints/*.pth
+
+# Documentation
+docs/_build/
+*.md
+!README.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large files
+*.h5
+*.hdf5
+*.pickle
+*.pkl
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+tmp/
+scratch/
+
+# Lock files
+*.lock
+uv.lock
+
+# Screenshots
+screenshots/
+

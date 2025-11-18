@@ -1,0 +1,48 @@
+# Core Deep Learning
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.24.0
+
+# Data Processing
+pandas>=2.0.0
+scipy>=1.10.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.14.0
+dash>=2.14.0
+dash-bootstrap-components>=1.5.0
+kaleido>=0.2.1
+
+# Configuration & Logging
+pyyaml>=6.0
+tensorboard>=2.13.0
+wandb>=0.15.0
+
+# Metrics & Evaluation
+scikit-learn>=1.3.0
+tqdm>=4.65.0
+
+# Development & Testing
+pytest>=7.3.0
+pytest-cov>=4.1.0
+black>=23.3.0
+flake8>=6.0.0
+mypy>=1.3.0
+isort>=5.12.0
+
+# Notebook Support
+jupyter>=1.0.0
+ipykernel>=6.23.0
+ipywidgets>=8.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+hydra-core>=1.3.0
+
+# ISO/IEC 25010 Quality & Security
+psutil>=5.9.0  # Performance & resource monitoring
+cryptography>=41.0.0  # Security (encryption, integrity)
+types-psutil>=5.9.0  # Type hints for mypy
+

@@ -1,0 +1,66 @@
+# Coverage.py configuration
+# Target: 85%+ test coverage
+
+[run]
+source = src
+branch = True
+omit =
+    */tests/*
+    */venv/*
+    */lib/*
+    */site-packages/*
+    */__pycache__/*
+    */.pytest_cache/*
+    */setup.py
+parallel = True
+concurrency = multiprocessing
+
+[report]
+# Show missing lines in coverage report
+precision = 2
+show_missing = True
+skip_covered = False
+skip_empty = False
+sort = Cover
+
+# Fail if coverage below threshold
+fail_under = 85.0
+
+# Exclude patterns
+exclude_lines =
+    # Standard pragmas
+    pragma: no cover
+    
+    # Don't complain about debug code
+    def __repr__
+    def __str__
+    
+    # Don't complain if tests don't hit defensive assertion code
+    raise AssertionError
+    raise NotImplementedError
+    
+    # Don't complain if non-runnable code isn't run
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    if typing.TYPE_CHECKING:
+    
+    # Don't complain about abstract methods
+    @abstract
+    @abstractmethod
+    
+    # Don't complain about type checking imports
+    @overload
+    
+    # Don't complain about pass statements
+    pass
+
+[html]
+directory = htmlcov
+title = LSTM Frequency Extraction - Coverage Report
+
+[xml]
+output = coverage.xml
+
+[json]
+output = coverage.json
+
