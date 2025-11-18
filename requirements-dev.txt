@@ -62,7 +62,7 @@ dash>=2.13.0
 dash-bootstrap-components>=1.4.0
 
 # Development Utilities
-ipython>=7.23.1  # 8.12.3 is the last version supporting Python 3.8
+ipython>=7.23.1,<8.13.0  # Python 3.8 only supports ipython up to 8.12.3
 rich>=13.5.0  # Beautiful terminal output
 watchdog>=3.0.0  # File watching for auto-reload
 
