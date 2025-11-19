@@ -9,8 +9,8 @@ data:
   num_samples: 10000  # calculated: duration * sampling_rate
   
   # Noise parameters
-  amplitude_range: [0.8, 1.2]
-  phase_range: [0, 6.283185307179586]  # [0, 2π]
+  amplitude_range: [0.95, 1.05]  # 5% noise - reduced from 20% to help model converge
+  phase_range: [0, 0.785398]  # [0, π/4] = 45° - reduced from 360° to preserve signal
   
   # Random seeds for reproducibility
   train_seed: 1
@@ -35,9 +35,9 @@ model:
 
 # Training Parameters
 training:
-  batch_size: 32
-  epochs: 50
-  learning_rate: 0.001
+  batch_size: 64  # Increased for more stable gradients
+  epochs: 100
+  learning_rate: 0.0001  # Reduced from 0.001 to avoid overshooting
   weight_decay: 1e-5
   
   # Optimization
