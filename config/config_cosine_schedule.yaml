@@ -1,0 +1,94 @@
+# Configuration with Cosine Annealing Scheduler
+# Better for preventing loss spikes - proactive LR reduction
+
+# Data Generation Parameters
+data:
+  frequencies: [1.0, 3.0, 5.0, 7.0]  # Hz
+  sampling_rate: 1000  # Hz
+  duration: 10.0  # seconds
+  num_samples: 10000  # calculated: duration * sampling_rate
+  
+  # Noise parameters - 2% NOISE LEVEL (LOW NOISE EXPERIMENT)
+  amplitude_range: [0.98, 1.02]            # A(t) ~ Uniform(0.98, 1.02) - 2% variation
+  phase_range: [0, 0.1257]                 # φ(t) ~ Uniform(0, 2% of 2π) - 2% variation
+  
+  # Random seeds for reproducibility
+  train_seed: 1
+  test_seed: 2
+  
+  # Dataset structure
+  num_frequencies: 4
+  total_train_samples: 40000  # num_samples * num_frequencies
+
+# Model Architecture
+model:
+  input_size: 5  # S[t] + 4 one-hot values
+  hidden_size: 128
+  num_layers: 2
+  output_size: 1
+  dropout: 0.2
+  bidirectional: false
+  
+  # State management
+  stateful: true
+  sequence_length: 1  # L=1 for this assignment
+
+# Training Parameters
+training:
+  batch_size: 32
+  epochs: 50
+  learning_rate: 0.001  # Start higher, cosine will reduce it smoothly
+  weight_decay: 1e-5
+
+  # Optimization - COSINE ANNEALING (PROACTIVE)
+  optimizer: "adam"
+  scheduler: "cosine"  # Smoothly reduces LR throughout training
+  
+  # Early stopping
+  early_stopping_patience: 10
+  min_delta: 1e-6
+  
+  # Gradient clipping - more aggressive
+  gradient_clip_value: 0.5
+  
+  # Validation
+  validation_split: 0.1
+
+# Evaluation
+evaluation:
+  metrics: ["mse", "mae", "r2_score"]
+  visualization_samples: 1000  # samples to plot
+
+# Experiment Tracking
+experiment:
+  name: "lstm_frequency_extraction_cosine"
+  save_dir: "./experiments"
+  save_model: true
+  save_plots: true
+  log_frequency: 100  # batches
+  
+# Computational
+compute:
+  device: "auto"  # auto, cpu, cuda, mps
+  num_workers: 4
+  pin_memory: true
+  
+# Reproducibility
+reproducibility:
+  seed: 42
+  deterministic: true
+  benchmark: false
+
+# Cost Analysis
+cost_analysis:
+  enabled: true
+  detailed_report: true
+  export_json: true
+  create_visualizations: true
+  inference_benchmark_samples: 100
+  inference_warmup_runs: 10
+  include_cloud_comparison: true
+  cloud_providers: ["aws", "azure", "gcp"]
+  generate_recommendations: true
+  recommendation_priority_filter: ["high", "medium", "low"]
+

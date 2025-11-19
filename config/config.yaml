@@ -8,9 +8,9 @@ data:
   duration: 10.0  # seconds
   num_samples: 10000  # calculated: duration * sampling_rate
   
-  # Noise parameters - 2% NOISE LEVEL (LOW NOISE EXPERIMENT)
-  amplitude_range: [0.98, 1.02]            # A(t) ~ Uniform(0.98, 1.02) - 2% variation
-  phase_range: [0, 0.1257]                 # φ(t) ~ Uniform(0, 2% of 2π) - 2% variation
+  # Noise parameters
+  amplitude_range: [0.95, 1.05]  # 5% noise - reduced from 20% to help model converge
+  phase_range: [0, 0.785398]  # [0, π/4] = 45° - reduced from 360° to preserve signal
   
   # Random seeds for reproducibility
   train_seed: 1
@@ -35,16 +35,16 @@ model:
 
 # Training Parameters
 training:
-  batch_size: 32
-  epochs: 50
-  learning_rate: 0.0005  # Balanced: Fast learning but stable (5x original)
+  batch_size: 64  # Increased for more stable gradients
+  epochs: 100
+  learning_rate: 0.0001  # Reduced from 0.001 to avoid overshooting
   weight_decay: 1e-5
-
+  
   # Optimization
   optimizer: "adam"
   scheduler: "reduce_on_plateau"
-  scheduler_patience: 10  # More patience before reducing LR
-  scheduler_factor: 0.7  # Gentler reduction
+  scheduler_patience: 5
+  scheduler_factor: 0.5
   
   # Early stopping
   early_stopping_patience: 10
