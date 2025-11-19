@@ -577,7 +577,7 @@ class TestReproducibility:
                 test_seed=43
             )
             
-            train_loader, _ = create_dataloaders(
+            train_loader, _, _, _ = create_dataloaders(
                 train_gen, test_gen,
                 batch_size=16,
                 normalize=True

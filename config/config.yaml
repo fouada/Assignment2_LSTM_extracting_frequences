@@ -8,9 +8,9 @@ data:
   duration: 10.0  # seconds
   num_samples: 10000  # calculated: duration * sampling_rate
   
-  # Noise parameters
-  amplitude_range: [0.95, 1.05]
-  phase_range:  [0, 0.785398]  # [0, 2π]
+  # Noise parameters (FULL ASSIGNMENT VALUES - REQUIRED!)
+  amplitude_range: [0.8, 1.2]              # A(t) ~ Uniform(0.8, 1.2) per assignment
+  phase_range: [0, 6.283185307179586]      # φ(t) ~ Uniform(0, 2π) per assignment
   
   # Random seeds for reproducibility
   train_seed: 1
@@ -23,7 +23,7 @@ data:
 # Model Architecture
 model:
   input_size: 5  # S[t] + 4 one-hot values
-  hidden_size: 256  # Increased capacity for better frequency separation
+  hidden_size: 128
   num_layers: 2
   output_size: 1
   dropout: 0.2
