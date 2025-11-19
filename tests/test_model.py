@@ -128,6 +128,45 @@ class TestStatefulLSTMExtractor:
         assert loaded_model.input_size == model.input_size
         assert loaded_model.hidden_size == model.hidden_size
         assert loaded_model.num_layers == model.num_layers
+    
+    def test_forward_with_return_state(self, model):
+        """Test forward pass with return_state=True."""
+        input_tensor = torch.randn(4, 5)
+        
+        output, hidden, cell = model(input_tensor, return_state=True)
+        
+        assert output.shape == (4, 1)
+        assert hidden.shape == (2, 4, 32)  # num_layers=2, batch=4, hidden=32
+        assert cell.shape == (2, 4, 32)
+    
+    def test_predict_sequence(self, model):
+        """Test predict_sequence method."""
+        input_tensor = torch.randn(8, 10, 5)  # batch=8, seq=10
+        
+        # First, do a forward pass to set state
+        model.reset_state()
+        _ = model(input_tensor[:, :5, :])  # Process first half
+        state_after_first = model.hidden_state.clone()
+        
+        # Now use predict_sequence
+        output = model.predict_sequence(input_tensor[:, 5:, :], reset_state=False)
+        
+        # State should be restored to what it was before predict_sequence
+        assert torch.allclose(model.hidden_state, state_after_first)
+        assert output.shape == (8, 5, 1)
+    
+    def test_predict_sequence_with_reset(self, model):
+        """Test predict_sequence with reset_state=True."""
+        input_tensor = torch.randn(8, 10, 5)
+        
+        # Set some state
+        model.reset_state()
+        _ = model(input_tensor[:, :5, :])
+        
+        # predict_sequence with reset should reset internal state first
+        output = model.predict_sequence(input_tensor, reset_state=True)
+        
+        assert output.shape == (8, 10, 1)
 
 
 class TestModelFactory:

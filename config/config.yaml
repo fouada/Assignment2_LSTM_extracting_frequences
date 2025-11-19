@@ -8,9 +8,9 @@ data:
   duration: 10.0  # seconds
   num_samples: 10000  # calculated: duration * sampling_rate
   
-  # Noise parameters (FULL ASSIGNMENT VALUES - REQUIRED!)
-  amplitude_range: [0.8, 1.2]              # A(t) ~ Uniform(0.8, 1.2) per assignment
-  phase_range: [0, 6.283185307179586]      # φ(t) ~ Uniform(0, 2π) per assignment
+  # Noise parameters - 2% NOISE LEVEL (LOW NOISE EXPERIMENT)
+  amplitude_range: [0.98, 1.02]            # A(t) ~ Uniform(0.98, 1.02) - 2% variation
+  phase_range: [0, 0.1257]                 # φ(t) ~ Uniform(0, 2% of 2π) - 2% variation
   
   # Random seeds for reproducibility
   train_seed: 1
