@@ -2,36 +2,37 @@
 COMPREHENSIVE SEQUENCE LENGTH EXPERIMENT ANALYSIS
 ================================================================================
 
-Experiment Date: 2025-11-19 20:58:33
-Total Experiments: 3
+Experiment Date: 2025-11-19 23:56:19
+Total Experiments: 4
 Device: mps
 
 RESULTS SUMMARY
 --------------------------------------------------------------------------------
 L        Train MSE    Test MSE     Gap          Time(s)    Conv.Epochs 
 --------------------------------------------------------------------------------
-1        3.970927     4.016573     0.045646     149.76     1           
-10       3.983359     4.024684     0.041325     22.10      1           
-50       4.023722     3.956727     -0.066995    9.10       1           
+10       3.977229     4.018274     0.041045     59.70      1           
+50       3.999356     3.944085     -0.055272    14.66      2           
+100      4.096950     3.989302     -0.107648    15.09      2           
+500      3.980570     4.026520     0.045950     18.21      3           
 
 
 DETAILED ANALYSIS
 ================================================================================
 
-Best Test Performance: L=50 (MSE=3.956727)
-Best Train Performance: L=1 (MSE=3.970927)
-Fastest Convergence: L=1 (1 epochs)
-Fastest Training: L=50 (9.10s)
+Best Test Performance: L=50 (MSE=3.944085)
+Best Train Performance: L=10 (MSE=3.977229)
+Fastest Convergence: L=10 (1 epochs)
+Fastest Training: L=50 (14.66s)
 
 KEY INSIGHTS
 --------------------------------------------------------------------------------
-1. Performance improves with increasing L
-2. Average generalization gap: 0.006659 (mild overfitting)
-3. Training time increases 0.06x from L=1 to L=50
+1. Performance degrades with increasing L
+2. Average generalization gap: -0.018981 (good generalization)
+3. Training time increases 0.31x from L=10 to L=500
 
 
 RECOMMENDATIONS
 --------------------------------------------------------------------------------
 • For best accuracy: Use L=50
 • For fastest training: Use L=50
-• For balanced performance: Consider L=10
+• For balanced performance: Consider L=100
