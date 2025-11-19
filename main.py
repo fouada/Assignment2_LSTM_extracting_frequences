@@ -164,18 +164,17 @@ def main():
     logger.info("\n" + "="*80)
     logger.info("STEP 2: Dataset Creation")
     logger.info("="*80)
-    
-    train_loader, test_loader = create_dataloaders(
+
+    # CRITICAL FIX: create_dataloaders now returns datasets too
+    train_loader, test_loader, train_dataset, test_dataset = create_dataloaders(
         train_generator=train_generator,
         test_generator=test_generator,
         batch_size=config['training']['batch_size'],
         normalize=True,
         device='cpu'
     )
-    
-    # Keep datasets for later visualization
-    train_dataset = FrequencyExtractionDataset(train_generator, normalize=True)
-    test_dataset = FrequencyExtractionDataset(test_generator, normalize=True)
+
+    # Datasets are now created correctly with proper normalization sharing
     
     # ========================================================================
     # Step 3: Create Model

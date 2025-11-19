@@ -32,37 +32,73 @@ class FrequencyExtractionDataset(Dataset):
         self,
         signal_generator: SignalGenerator,
         normalize: bool = True,
-        device: str = 'cpu'
+        device: str = 'cpu',
+        normalization_params: Optional[Dict[str, float]] = None
     ):
         """
         Initialize the dataset.
-        
+
         Args:
             signal_generator: SignalGenerator instance
             normalize: Whether to normalize the mixed signal
             device: Device to put tensors on
+            normalization_params: Optional dict with 'mean' and 'std' for test set normalization.
+                                 If provided, uses these params instead of computing from data.
         """
         self.generator = signal_generator
         self.normalize = normalize
         self.device = device
-        
+
         # Generate data
         logger.info("Generating dataset...")
         self.mixed_signal, self.targets = self.generator.generate_complete_dataset()
-        
+
         self.num_time_samples = len(self.mixed_signal)
         self.num_frequencies = len(self.generator.frequencies)
         self.total_samples = self.num_time_samples * self.num_frequencies
-        
-        # Optional normalization
+
+        # Store normalization parameters
+        self.signal_mean = 0.0
+        self.signal_std = 1.0
+
+        # Optional normalization - normalize ONLY the input (mixed signal)
+        # Targets (pure sine waves) remain unchanged at ±1 amplitude
         if self.normalize:
-            self.signal_mean = np.mean(self.mixed_signal)
-            self.signal_std = np.std(self.mixed_signal)
+            # Use provided normalization params (for test set) OR compute from data (for train set)
+            if normalization_params is not None:
+                self.signal_mean = normalization_params['mean']
+                self.signal_std = normalization_params['std']
+                logger.info(f"Using provided normalization params: mean={self.signal_mean:.4f}, std={self.signal_std:.4f}")
+            else:
+                # Calculate global statistics from mixed signal
+                self.signal_mean = np.mean(self.mixed_signal)
+                self.signal_std = np.std(self.mixed_signal)
+                logger.info(f"Computed normalization params from data: mean={self.signal_mean:.4f}, std={self.signal_std:.4f}")
+
+            # Normalize ONLY the mixed signal (input)
             self.mixed_signal = (self.mixed_signal - self.signal_mean) / (self.signal_std + 1e-8)
-            logger.info(f"Signal normalized: mean={self.signal_mean:.4f}, std={self.signal_std:.4f}")
-        
+
+            # CRITICAL FIX: Do NOT normalize targets!
+            # Targets are pure sine waves (±1 amplitude) - they should remain unchanged
+            # The model learns to map from normalized inputs to pure sine outputs
+
+            logger.info(f"Input (mixed signal) normalized: mean={self.signal_mean:.4f}, std={self.signal_std:.4f}")
+            logger.info(f"✅ CORRECT: Targets (pure sine) kept at original scale (±1 amplitude)")
+
         logger.info(f"Dataset created: {self.total_samples} total samples "
                    f"({self.num_time_samples} time steps × {self.num_frequencies} frequencies)")
+
+    def get_normalization_params(self) -> Dict[str, float]:
+        """
+        Get normalization parameters for use with test set.
+
+        Returns:
+            Dictionary with 'mean' and 'std' keys
+        """
+        return {
+            'mean': self.signal_mean,
+            'std': self.signal_std
+        }
     
     def __len__(self) -> int:
         """Return total number of samples."""
@@ -261,51 +297,56 @@ def create_dataloaders(
     batch_size: int = 32,
     normalize: bool = True,
     device: str = 'cpu'
-) -> Tuple[StatefulDataLoader, StatefulDataLoader]:
+) -> Tuple[StatefulDataLoader, StatefulDataLoader, FrequencyExtractionDataset, FrequencyExtractionDataset]:
     """
     Factory function to create train and test data loaders.
-    
+
     Args:
         train_generator: Training signal generator
         test_generator: Test signal generator
         batch_size: Batch size
         normalize: Whether to normalize signals
         device: Device for tensors
-        
+
     Returns:
-        Tuple of (train_loader, test_loader)
+        Tuple of (train_loader, test_loader, train_dataset, test_dataset)
     """
     logger.info("Creating datasets and dataloaders...")
-    
-    # Create datasets
+
+    # Create TRAIN dataset first (computes normalization params)
     train_dataset = FrequencyExtractionDataset(
         train_generator,
         normalize=normalize,
         device=device
     )
-    
+
+    # Create TEST dataset using TRAIN normalization params (CRITICAL FIX!)
+    test_normalization_params = train_dataset.get_normalization_params() if normalize else None
     test_dataset = FrequencyExtractionDataset(
         test_generator,
         normalize=normalize,
-        device=device
+        device=device,
+        normalization_params=test_normalization_params  # Use training stats!
     )
-    
+
+    logger.info("✅ CRITICAL FIX: Test dataset uses SAME normalization as training!")
+
     # Create stateful loaders
     train_loader = StatefulDataLoader(
         train_dataset,
         batch_size=batch_size,
         shuffle_frequencies=True  # Shuffle frequency order each epoch
     )
-    
+
     test_loader = StatefulDataLoader(
         test_dataset,
         batch_size=batch_size,
         shuffle_frequencies=False  # Keep consistent for evaluation
     )
-    
+
     logger.info("Dataloaders created successfully!")
     logger.info(f"Train batches per epoch: {len(train_loader)}")
     logger.info(f"Test batches per epoch: {len(test_loader)}")
-    
-    return train_loader, test_loader
+
+    return train_loader, test_loader, train_dataset, test_dataset
 

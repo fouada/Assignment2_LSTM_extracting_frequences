@@ -66,15 +66,17 @@ class TestDataPipeline:
             test_seed=test_seed + 1
         )
         
-        train_loader, test_loader = create_dataloaders(
+        train_loader, test_loader, train_dataset, test_dataset = create_dataloaders(
             train_gen,
             test_gen,
             batch_size=16,
             normalize=True
         )
-        
+
         assert len(train_loader) > 0
         assert len(test_loader) > 0
+        assert train_dataset is not None
+        assert test_dataset is not None
     
     @pytest.mark.integration
     def test_data_reproducibility(self, minimal_signal_config):
@@ -391,13 +393,13 @@ class TestCompleteWorkflow:
             test_seed=test_seed + 1
         )
         
-        train_loader, test_loader = create_dataloaders(
+        train_loader, test_loader, train_dataset, test_dataset = create_dataloaders(
             train_gen,
             test_gen,
             batch_size=16,
             normalize=True
         )
-        
+
         # 2. Create model
         model_config = {
             'input_size': 3,

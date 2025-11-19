@@ -74,6 +74,8 @@ class StatefulLSTMExtractor(nn.Module):
         self.activation = nn.ReLU()
         self.dropout_layer = nn.Dropout(dropout)
         self.fc2 = nn.Linear(hidden_size // 2, output_size)
+        # Output activation to bound output to ±1 (since targets are pure sine waves)
+        self.output_activation = nn.Tanh()  # ✅ Bounds output to [-1, +1]
         
         # Initialize weights
         self._init_weights()
@@ -199,7 +201,8 @@ class StatefulLSTMExtractor(nn.Module):
         out = self.activation(out)
         out = self.dropout_layer(out)
         out = self.fc2(out)
-        
+        out = self.output_activation(out)  # ✅ Apply Tanh to bound output to [-1, +1]
+
         # Remove sequence dimension if input was single sample
         if single_sample:
             out = out.squeeze(1)

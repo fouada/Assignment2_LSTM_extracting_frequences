@@ -9,8 +9,8 @@ data:
   num_samples: 10000  # calculated: duration * sampling_rate
   
   # Noise parameters
-  amplitude_range: [0.8, 1.2]
-  phase_range: [0, 6.283185307179586]  # [0, 2π]
+  amplitude_range: [0.95, 1.05]
+  phase_range:  [0, 0.785398]  # [0, 2π]
   
   # Random seeds for reproducibility
   train_seed: 1
@@ -23,7 +23,7 @@ data:
 # Model Architecture
 model:
   input_size: 5  # S[t] + 4 one-hot values
-  hidden_size: 128
+  hidden_size: 256  # Increased capacity for better frequency separation
   num_layers: 2
   output_size: 1
   dropout: 0.2
@@ -37,14 +37,14 @@ model:
 training:
   batch_size: 32
   epochs: 50
-  learning_rate: 0.001
+  learning_rate: 0.0005  # Balanced: Fast learning but stable (5x original)
   weight_decay: 1e-5
-  
+
   # Optimization
   optimizer: "adam"
   scheduler: "reduce_on_plateau"
-  scheduler_patience: 5
-  scheduler_factor: 0.5
+  scheduler_patience: 10  # More patience before reducing LR
+  scheduler_factor: 0.7  # Gentler reduction
   
   # Early stopping
   early_stopping_patience: 10
