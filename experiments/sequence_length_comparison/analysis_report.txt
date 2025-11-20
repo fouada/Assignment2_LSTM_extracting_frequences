@@ -2,7 +2,7 @@
 COMPREHENSIVE SEQUENCE LENGTH EXPERIMENT ANALYSIS
 ================================================================================
 
-Experiment Date: 2025-11-19 23:56:19
+Experiment Date: 2025-11-20 01:55:57
 Total Experiments: 4
 Device: mps
 
@@ -10,29 +10,29 @@ RESULTS SUMMARY
 --------------------------------------------------------------------------------
 L        Train MSE    Test MSE     Gap          Time(s)    Conv.Epochs 
 --------------------------------------------------------------------------------
-10       3.977229     4.018274     0.041045     59.70      1           
-50       3.999356     3.944085     -0.055272    14.66      2           
-100      4.096950     3.989302     -0.107648    15.09      2           
-500      3.980570     4.026520     0.045950     18.21      3           
+10       2.847192     2.877926     0.030735     38.44      2           
+50       2.674040     2.625081     -0.048959    17.18      14          
+100      2.864800     2.799485     -0.065315    15.80      10          
+500      2.931418     3.000014     0.068596     15.49      7           
 
 
 DETAILED ANALYSIS
 ================================================================================
 
-Best Test Performance: L=50 (MSE=3.944085)
-Best Train Performance: L=10 (MSE=3.977229)
-Fastest Convergence: L=10 (1 epochs)
-Fastest Training: L=50 (14.66s)
+Best Test Performance: L=50 (MSE=2.625081)
+Best Train Performance: L=50 (MSE=2.674040)
+Fastest Convergence: L=10 (2 epochs)
+Fastest Training: L=500 (15.49s)
 
 KEY INSIGHTS
 --------------------------------------------------------------------------------
 1. Performance degrades with increasing L
-2. Average generalization gap: -0.018981 (good generalization)
-3. Training time increases 0.31x from L=10 to L=500
+2. Average generalization gap: -0.003736 (good generalization)
+3. Training time increases 0.40x from L=10 to L=500
 
 
 RECOMMENDATIONS
 --------------------------------------------------------------------------------
 • For best accuracy: Use L=50
-• For fastest training: Use L=50
+• For fastest training: Use L=500
 • For balanced performance: Consider L=100

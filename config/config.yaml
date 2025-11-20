@@ -8,9 +8,11 @@ data:
   duration: 10.0  # seconds
   num_samples: 10000  # calculated: duration * sampling_rate
   
-  # Noise parameters
   amplitude_range: [0.95, 1.05]  # 5% noise - reduced from 20% to help model converge
   phase_range: [0, 0.785398]  # [0, π/4] = 45° - reduced from 360° to preserve signal
+  # Noise parameters
+  #amplitude_range: [0.8, 1.2]  # Ai(t) ~ Uniform(0.8, 1.2) - 20% variation
+  #phase_range: [0, 6.283185307179586]  # φi(t) ~ Uniform(0, 2π) - full phase range
   
   # Random seeds for reproducibility
   train_seed: 1

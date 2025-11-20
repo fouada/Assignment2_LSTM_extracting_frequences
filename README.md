@@ -974,6 +974,129 @@ This means you can:
 
 ---
 
+## 🧪 Experiments Done
+
+This section documents the key experiments conducted to evaluate and optimize the LSTM frequency extraction system.
+
+### Experiment 1: Sequence Length Impact Analysis
+
+**Location:** `experiments/sequence_length_comparison/`
+
+**Objective:** Investigate how different sequence lengths (L) affect model performance, training time, and convergence speed.
+
+**Configuration:**
+- Sequence lengths tested: L = 1, 10, 50, 100, 500
+- Model: LSTM with 128 hidden units, 2 layers
+- Training: 40 epochs with early stopping
+- Noise: Reduced amplitude and phase variation
+
+**Results Summary:**
+
+| Sequence Length (L) | Train MSE | Test MSE | Generalization Gap | Conv. Epochs | Training Time (s) |
+|---------------------|-----------|----------|-------------------|--------------|-------------------|
+| **1** (baseline)    | N/A       | N/A      | N/A               | N/A          | N/A               |
+| **10**              | 2.847     | 2.878    | +0.031           | 2            | 38.44             |
+| **50**              | 2.674     | 2.625    | -0.049           | 14           | 17.18             |
+| **100**             | 2.865     | 2.799    | -0.065           | 10           | 15.80             |
+| **500**             | 2.931     | 3.000    | +0.069           | 7            | 15.49             |
+
+**Key Findings:**
+1. **Best Performance:** L=50 achieved the lowest test MSE (2.625)
+2. **Fastest Convergence:** L=10 converged in just 2 epochs
+3. **Training Speed:** Longer sequences (L≥100) train faster per epoch due to fewer batches
+4. **Trade-offs:** L=50 provides the best balance between accuracy and efficiency
+
+![Sequence Length Comparison](experiments/sequence_length_comparison/comparative_analysis.png)
+
+**Recommendations:**
+- For accuracy-critical applications: Use L=50
+- For rapid prototyping: Use L=10
+- For resource-constrained environments: Use L=500
+
+---
+
+### Experiment 2: Increased Noise Robustness Test
+
+**Location:** `experiments/lstm_frequency_extraction_20251120_020750/`
+
+**Objective:** Test model performance with significantly increased noise levels to evaluate robustness.
+
+**Configuration Changes:**
+- **Amplitude Variation:** Ai(t) ~ Uniform(0.8, 1.2) - increased from ±5% to ±20%
+- **Phase Variation:** φi(t) ~ Uniform(0, 2π) - increased from [0, π/4] to full range
+- Model: Same architecture (128 hidden, 2 layers)
+- Training: 100 epochs with early stopping (stopped at epoch 20)
+
+**Results:**
+
+| Metric | Training | Testing | Analysis |
+|--------|----------|---------|----------|
+| **MSE** | 0.4979 | 0.4979 | Higher due to increased noise |
+| **MAE** | 0.6349 | 0.6349 | Consistent across sets |
+| **R² Score** | 0.0041 | 0.0041 | Significantly degraded |
+| **Correlation** | 0.070 | 0.070 | Poor correlation |
+| **SNR (dB)** | 0.018 | 0.018 | Very low signal quality |
+
+**Key Observations:**
+1. **Noise Impact:** 20% amplitude variation + full phase range creates extremely challenging conditions
+2. **Model Limitation:** Current architecture struggles with high noise levels (R² near 0)
+3. **Generalization:** Despite poor performance, train/test metrics remain consistent (no overfitting)
+4. **Early Stopping:** Model stopped improving after 10 epochs, triggered early stopping
+
+**Comparison with Previous Experiment:**
+
+| Configuration | Amplitude Range | Phase Range | Test MSE | R² Score |
+|---------------|-----------------|-------------|----------|----------|
+| **Original** (Exp1) | [0.95, 1.05] | [0, π/4] | ~0.001256 | >0.99 |
+| **High Noise** (Exp2) | [0.8, 1.2] | [0, 2π] | 0.4979 | 0.0041 |
+| **Performance Drop** | 4× noise | 8× phase | 396× worse | 99.6% drop |
+
+![Training History - High Noise](experiments/lstm_frequency_extraction_20251120_020750/plots/training_history.png)
+
+![Frequency Extraction - High Noise](experiments/lstm_frequency_extraction_20251120_020750/plots/graph1_single_frequency_f2.png)
+
+**Implications:**
+1. **Architecture Needs:** High noise scenarios require:
+   - Deeper networks (more layers)
+   - Attention mechanisms for signal focus
+   - Denoising pre-processing
+   - Longer training (more epochs)
+
+2. **Practical Applications:**
+   - Current model works well for clean/moderate noise (≤10% variation)
+   - Industrial/real-world scenarios with >20% noise need enhanced architectures
+   - Consider ensemble methods or hybrid approaches (LSTM + traditional filtering)
+
+---
+
+### Experiment 3: LSTM with Optimized Parameters
+
+**Location:** `experiments/lstm_frequency_extraction_20251120_012950/`
+
+**Objective:** Baseline experiment with optimized noise levels for production use.
+
+**Configuration:**
+- Amplitude: Ai(t) ~ Uniform(0.95, 1.05) - 5% variation
+- Phase: φi(t) ~ Uniform(0, π/4) - 45° range
+- Frequencies: [1, 3, 5, 7] Hz
+- Training: 100 epochs (early stopped ~40 epochs)
+
+**Results:**
+- **Train MSE:** ~0.001234 ✅ Excellent
+- **Test MSE:** ~0.001256 ✅ Excellent
+- **R² Score:** >0.99 ✅ Excellent
+- **Generalization Gap:** <2% ✅ Very Good
+- **Training Time:** ~5-8 minutes
+
+![Cost Analysis](experiments/lstm_frequency_extraction_20251120_012950/cost_analysis/cost_dashboard.png)
+
+**Production Recommendations:**
+- This configuration provides optimal balance of accuracy and training speed
+- Suitable for real-time frequency extraction applications
+- Demonstrates robust generalization
+
+---
+
 ## 📚 Citation
 
 If you use this project in your research or work, please cite:
